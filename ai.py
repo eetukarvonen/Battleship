@@ -34,13 +34,13 @@ and finds the move next to previous hits.
 import random
 
 class Ai:
-    available_moves = []
-    random_moves = []
-    hits = []
-    permanent_hits = []
-    hit_orient = 'l' # Which direction to seek when found hit. (r)ight, (d)own (l)eft or (u)p 
-
     def __init__(self):
+        self.available_moves = []
+        self.random_moves = []
+        self.hits = []
+        self.permanent_hits = []
+        self.hit_orient = 'l' # Which direction to seek when found hit. (r)ight, (d)own (l)eft or (u)p 
+
         for i in range(1,11):
             for j in range(1,11):
                 if i % 2 == j % 2:  # Only every other move is added to random moves

@@ -11,7 +11,7 @@ pics = {}
 state = {
     "state": 0, # 0=place ship horizontally, 1=place ship vertically, 2=player turn, 3=computer turn, 4=game over
     "ship": 1, # 1=first ship, 2=second ship ... used to place ships
-    "ai": ai.Ai()
+    "ai": None
 }
 
 def load_pics(path):
@@ -21,6 +21,7 @@ def load_pics(path):
     pics["empty"] = pyglet.resource.image("square_back.png")
     pics["ship"] = pyglet.resource.image("square_x.png")
     pics["rotate"] = pyglet.resource.image("rotate.png")
+    pics["new"] = pyglet.resource.image("new_game.png")
 
 def write_text(text, x, y):
     label = pyglet.text.Label(text, 
@@ -70,7 +71,6 @@ def draw_squares(boardP, boardC_show):
     sprites.clear()
 
 def draw_message():
-    
     if state["state"] == 1:
         text = "Place your ship vertically"
         write_text(text, 0, 450)
@@ -85,7 +85,11 @@ def draw_message():
         text = game.game["player_last"]
         write_text(text, 450, 450)
         text2 = game.game["com_last"]
-        write_text(text2, 0, 450)    
+        write_text(text2, 0, 450)
+    
+    if state["state"] == 4:
+        rotate = pyglet.sprite.Sprite(pics["new"], x=280, y=410)
+        rotate.draw()
 
 def click_place_ship(x,y):
     height = 10
@@ -120,7 +124,7 @@ def click_place_ship(x,y):
         orient = state["state"]
         if game.validate_placement(x_fixed, y_fixed, orient, size, game.game["boards"]["boardP"]):
             game.place_ship(x_fixed, y_fixed, orient, 'e', game.game["boards"]["boardP"])
-            state["state"] = random.randint(2,3)
+            state["state"] = random.randint(2,3) # Randomly choose player or computer start
 
 def click_fire(x,y,board):
     height = 10
@@ -142,7 +146,6 @@ def click_fire(x,y,board):
             game.game["player_last"] = "Hit"
         board[y_fixed][x_fixed] = '$'
         game.game["boards"]["boardC_show"][y_fixed][x_fixed] = '$'
-    
 
 def rotate_click(x,y):
     if x > 280 and y > 410 and x < 430 and y < 470:
@@ -172,7 +175,27 @@ def player_won():
         sum += game.game["player_ships"][ship]
     if sum == 0:
         return False
-    
+
+def new_game():
+    game.game["boards"]["boardP"] = game.create_board()
+    game.game["boards"]["boardC"] = game.create_board()
+    game.game["boards"]["boardC_show"] = game.create_board()
+    game.game["player_last"] = "Game on"
+    game.game["com_last"] = ""
+    game.game["player_ships"]["a"] = 2
+    game.game["player_ships"]["b"] = 3
+    game.game["player_ships"]["c"] = 3
+    game.game["player_ships"]["d"] = 4
+    game.game["player_ships"]["e"] = 5
+    game.game["computer_ships"]["a"] = 2
+    game.game["computer_ships"]["b"] = 3
+    game.game["computer_ships"]["c"] = 3
+    game.game["computer_ships"]["d"] = 4
+    game.game["computer_ships"]["e"] = 5
+    game.ai_place_ships()
+    state["ai"] = ai.Ai()
+    state["ship"] = 1
+    state["state"] = 0
 
 @win.event
 def on_mouse_press(x, y, btn, modifiers):
@@ -196,7 +219,9 @@ def on_mouse_press(x, y, btn, modifiers):
             state["ai"] = game.computer_guess(game.game["boards"]["boardP"], state["ai"])
             if game.game_on():
                 state["state"] = 2
-                    
+
+        if state["state"] == 4 and rotate_click(x, y):
+            new_game()
         
         if not game.game_on():
             state["state"] = 4
@@ -215,10 +240,6 @@ def on_draw():
 
 if __name__ == "__main__":
     load_pics("sprites")
-    game.game["boards"]["boardP"] = game.create_board()
-    game.game["boards"]["boardC"] = game.create_board()
-    game.game["boards"]["boardC_show"] = game.create_board()
-    game.ai_place_ships()
-    game.game["player_last"] = "Game on"
+    new_game()
 
     pyglet.app.run()
