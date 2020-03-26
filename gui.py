@@ -1,3 +1,16 @@
+"""
+
+Graphical version of battleship game
+
+@author: Eetu Karvonen
+
+Game uses 'pyglet' -library to draw game window and to handle mouse clicks
+
+Main game logic is in 'on_mouse_press()' -function. Global variable 'state' holds the state of the game.
+'game.py' -library handles boards
+
+"""
+
 import pyglet
 import random
 import game
